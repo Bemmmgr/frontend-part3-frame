@@ -31,7 +31,7 @@ export default function StarRating({
   className = "",
   messages = [],
   defaultRating = 0,
-  onSetRating,
+  onSetRating = () => {},
 }) {
   const [rating, setRating] = useState(defaultRating);
   // 10013 - handling hover event - temporary stars
