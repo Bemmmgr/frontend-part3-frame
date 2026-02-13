@@ -1,55 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
-import { useMovies } from "./useMovies";
-import { useLocalStorageState } from "./useLocalStorageState";
-import { useKey } from "./useKey";
 
-// 10004 - spliting up components in practice
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
-const KEY = "195eeac5";
+const KEY = "f84fc31d";
 
 export default function App() {
   const [query, setQuery] = useState("");
+  const [movies, setMovies] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
-  // const tempQuery = "interstellar";
 
-  // 13012 - creating first custom hook - useMovies
-  const { movies, isLoading, error } = useMovies(query, handleCloseMovie);
-
-  // 13013 -
-  const [watched, setWatched] = useLocalStorageState([], "watched");
-
-  // 12003 - how not to fetch data in react
-  // 12004 - useEffect - rigister side effect
-  // 12006 - use async function
-  // 12007 - add a loading indicator
-  // 12008 - Handling Errors
-  // 12010 - synchronizing queries with movie data
-
-  /*
-  // synchronize with []
-  useEffect(function () {
-    console.log("A");
-  }, []);
-
-  // synchronize with everything
-  useEffect(function () {
-    console.log("B");
+  // const [watched, setWatched] = useState([]);
+  const [watched, setWatched] = useState(function () {
+    const storedValue = localStorage.getItem("watched");
+    return JSON.parse(storedValue);
   });
 
-  console.log("C");
-
-  useEffect(
-    function () {
-      console.log("D");
-    },
-    [query],
-  );
-  */
-
-  // 12011 -
   function handleSelectMovie(id) {
     setSelectedId((selectedId) => (id === selectedId ? null : id));
   }
@@ -58,11 +27,9 @@ export default function App() {
     setSelectedId(null);
   }
 
-  // 12013 - Adding a watched movie
   function handleAddWatched(movie) {
     setWatched((watched) => [...watched, movie]);
 
-    // 13005 - Initializing state with a callback
     // localStorage.setItem("watched", JSON.stringify([...watched, movie]));
   }
 
@@ -70,20 +37,69 @@ export default function App() {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
 
-  // 10008 - fixing components drilling through componsition
-  // 为了把数据/回调传给很深层的子组件，不得不一层一层地通过 props 往下传，中间那些组件其实不需要这个数据，但也被迫接收并继续传递。
-  // NavBar - children - we can even make <Logo /> stateless (optional)
+  useEffect(
+    function () {
+      localStorage.setItem("watched", JSON.stringify(watched));
+    },
+    [watched]
+  );
 
-  // 10010 - Alternative to children
-  // passing elements as props
+  useEffect(
+    function () {
+      const controller = new AbortController();
+
+      async function fetchMovies() {
+        try {
+          setIsLoading(true);
+          setError("");
+
+          const res = await fetch(
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+            { signal: controller.signal }
+          );
+
+          if (!res.ok)
+            throw new Error("Something went wrong with fetching movies");
+
+          const data = await res.json();
+          if (data.Response === "False") throw new Error("Movie not found");
+
+          setMovies(data.Search);
+          setError("");
+        } catch (err) {
+          if (err.name !== "AbortError") {
+            console.log(err.message);
+            setError(err.message);
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      }
+
+      if (query.length < 3) {
+        setMovies([]);
+        setError("");
+        return;
+      }
+
+      handleCloseMovie();
+      fetchMovies();
+
+      return function () {
+        controller.abort();
+      };
+    },
+    [query]
+  );
+
   return (
     <>
       <NavBar>
         <Search query={query} setQuery={setQuery} />
         <NumResults movies={movies} />
       </NavBar>
+
       <Main>
-        {/* implicit children prop */}
         <Box>
           {/* {isLoading ? <Loader /> : <MovieList movies={movies} />} */}
           {isLoading && <Loader />}
@@ -92,6 +108,7 @@ export default function App() {
           )}
           {error && <ErrorMessage message={error} />}
         </Box>
+
         <Box>
           {selectedId ? (
             <MovieDetails
@@ -110,17 +127,6 @@ export default function App() {
             </>
           )}
         </Box>
-
-        {/* element as alternative way */}
-        {/* <Box element={<MovieList movies={movies} />} />
-        <Box
-          element={
-            <>
-              <WatchedSummary watched={watched} />
-              <WatchedMoviesList watched={watched} />
-            </>
-          }
-        /> */}
       </Main>
     </>
   );
@@ -133,7 +139,7 @@ function Loader() {
 function ErrorMessage({ message }) {
   return (
     <p className="error">
-      <span>🚯</span> {message}
+      <span>⛔️</span> {message}
     </p>
   );
 }
@@ -157,24 +163,30 @@ function Logo() {
 }
 
 function Search({ query, setQuery }) {
-  // 13007 - how not to select DOM elements in react
-  // 13008 - new hook: useRef - like a box we can put any data we want to preserve between renders
+  const inputEl = useRef(null);
+
+  useEffect(
+    function () {
+      function callback(e) {
+        if (document.activeElement === inputEl.current) return;
+
+        if (e.code === "Enter") {
+          inputEl.current.focus();
+          setQuery("");
+        }
+      }
+
+      document.addEventListener("keydown", callback);
+      return () => document.addEventListener("keydown", callback);
+    },
+    [setQuery]
+  );
 
   // useEffect(function () {
   //   const el = document.querySelector(".search");
+  //   console.log(el);
   //   el.focus();
   // }, []);
-
-  // 13009 - Refs to select DOM elements
-  const inputEl = useRef(null);
-
-  // we need useEffect to useRef
-  useKey("Enter", function () {
-    if (document.activeElement === inputEl.current) return;
-
-    inputEl.current.focus();
-    setQuery("");
-  });
 
   return (
     <input
@@ -188,8 +200,6 @@ function Search({ query, setQuery }) {
   );
 }
 
-// 10006 - Prop drilling
-// get access of movie state & read num of list and show
 function NumResults({ movies }) {
   return (
     <p className="num-results">
@@ -202,7 +212,6 @@ function Main({ children }) {
   return <main className="main">{children}</main>;
 }
 
-// 10009 - using composition to make reuseable Box
 function Box({ children }) {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -211,6 +220,7 @@ function Box({ children }) {
       <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
         {isOpen ? "–" : "+"}
       </button>
+
       {isOpen && children}
     </div>
   );
@@ -229,6 +239,7 @@ function WatchedBox() {
       >
         {isOpen2 ? "–" : "+"}
       </button>
+
       {isOpen2 && (
         <>
           <WatchedSummary watched={watched} />
@@ -265,29 +276,25 @@ function Movie({ movie, onSelectMovie }) {
   );
 }
 
-// 12011 - selecting a movie
-// 12012 - loading movie details
 function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const [movie, setMovie] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [userRating, setUserRating] = useState();
+  const [userRating, setUserRating] = useState("");
+
+  const countRef = useRef(0);
+
+  useEffect(
+    function () {
+      if (userRating) countRef.current++;
+    },
+    [userRating]
+  );
 
   const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
   const watchedUserRating = watched.find(
-    (movie) => movie.imdbID === selectedId,
+    (movie) => movie.imdbID === selectedId
   )?.userRating;
 
-  // 13010 - Refs to persist data between renders
-  // store rating decesions, but no rerenders - each time rating updated, ref got update as well
-  const countRef = useRef(0);
-  useEffect(
-    function () {
-      if (userRating) countRef.current = countRef.current + 1;
-    },
-    [userRating],
-  );
-
-  // destructure
   const {
     Title: title,
     Year: year,
@@ -301,26 +308,21 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     Genre: genre,
   } = movie;
 
-  // 13003 - the rules of hooks
+  // if (imdbRating > 8) return <p>Greatest ever!</p>;
   // if (imdbRating > 8) [isTop, setIsTop] = useState(true);
 
-  // early return - Hook 放在 early return 后面导致 Hook 调用不一致
-  // if (imdbRating > 8) return <p>Greatest ever!</p>;
-
-  // 13004 - more details of useState
-  // only look at initial state on initial render - still undefined
   // const [isTop, setIsTop] = useState(imdbRating > 8);
-  // console.log(isTop); // false forever
+  // console.log(isTop);
   // useEffect(
   //   function () {
-  //     setIsTop(imdbRating > 8); // true
+  //     setIsTop(imdbRating > 8);
   //   },
-  //   [imdbRating],
+  //   [imdbRating]
   // );
 
-  // const isTop = imdbRating > 8   // true
+  const isTop = imdbRating > 8;
+  console.log(isTop);
 
-  // updating state is asynchronous, we need callback func to update state
   // const [avgRating, setAvgRating] = useState(0);
 
   function handleAdd() {
@@ -332,54 +334,60 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
       imdbRating: Number(imdbRating),
       runtime: Number(runtime.split(" ").at(0)),
       userRating,
-      countRatingDecesions: countRef.current,
+      countRatingDecisions: countRef.current,
     };
 
     onAddWatched(newWatchedMovie);
     onCloseMovie();
 
-    /*
-    setAvgRating(Number(imdbRating));
-    // 0 - do not get access to updated state(setAvgRating)
-    // alert(avgRating);
-    // so we use callback func to access
-    setAvgRating((avgRating) => (avgRating + userRating) / 2);
-    */
+    // setAvgRating(Number(imdbRating));
+    // setAvgRating((avgRating) => (avgRating + userRating) / 2);
   }
 
-  useKey("Escape", onCloseMovie);
-
-  // loading current selected movie, everytime component mount
   useEffect(
     function () {
-      async function getMovieDetails(params) {
-        setIsLoading(true);
-        const response = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`,
-        );
-        const data = await response.json();
+      function callback(e) {
+        if (e.code === "Escape") {
+          onCloseMovie();
+        }
+      }
 
-        // console.log(data);
+      document.addEventListener("keydown", callback);
+
+      return function () {
+        document.removeEventListener("keydown", callback);
+      };
+    },
+    [onCloseMovie]
+  );
+
+  useEffect(
+    function () {
+      async function getMovieDetails() {
+        setIsLoading(true);
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`
+        );
+        const data = await res.json();
         setMovie(data);
         setIsLoading(false);
       }
       getMovieDetails();
     },
-    [selectedId],
+    [selectedId]
   );
 
-  // 12014 - Adding a new effect changing page title
   useEffect(
     function () {
       if (!title) return;
-      document.title = `Title | ${title}`;
+      document.title = `Movie | ${title}`;
 
-      // 12015 - clean up function
       return function () {
         document.title = "usePopcorn";
+        // console.log(`Clean up effect for movie ${title}`);
       };
     },
-    [title],
+    [title]
   );
 
   return (
@@ -393,7 +401,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
               &larr;
             </button>
             <img src={poster} alt={`Poster of ${movie} movie`} />
-
             <div className="details-overview">
               <h2>{title}</h2>
               <p>
@@ -420,14 +427,13 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
                   />
                   {userRating > 0 && (
                     <button className="btn-add" onClick={handleAdd}>
-                      + Add to List
+                      + Add to list
                     </button>
                   )}
                 </>
               ) : (
                 <p>
-                  You already rated this movie with {watchedUserRating}{" "}
-                  <span>🌟</span>.
+                  You rated with movie {watchedUserRating} <span>⭐️</span>
                 </p>
               )}
             </div>
@@ -489,7 +495,7 @@ function WatchedMoviesList({ watched, onDeleteWatched }) {
 
 function WatchedMovie({ movie, onDeleteWatched }) {
   return (
-    <li key={movie.imdbID}>
+    <li>
       <img src={movie.poster} alt={`${movie.title} poster`} />
       <h3>{movie.title}</h3>
       <div>
