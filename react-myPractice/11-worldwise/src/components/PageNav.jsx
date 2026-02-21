@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 
 // 17007 - using CSS modules: create one external CSS file per component
 import styles from "./PageNav.module.css";
-import Logo from "../components/Logo";
+import Logo from "./Logo";
 
 function PageNav() {
   return (
