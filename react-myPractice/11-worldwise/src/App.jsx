@@ -11,11 +11,20 @@ function App() {
     // 17004 - traditional way - define our routes in declarative way
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Homepage />} />
+        <Route index element={<Homepage />} />
         <Route path="product" element={<Product />} />
         <Route path="pricing" element={<Pricing />} />
         <Route path="/login" element={<Login />} />
-        <Route path="app" element={<AppLayout />} />
+
+        {/* 17010 - Nested routes and index route */}
+        <Route path="app" element={<AppLayout />}>
+          {/* default route */}
+          <Route index element={<p>city list</p>} />
+          {/* child routes */}
+          <Route path="cities" element={<p>List of cities</p>} />
+          <Route path="countries" element={<p>Countries</p>} />
+          <Route path="form" element={<p>Form</p>} />
+        </Route>
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </BrowserRouter>
