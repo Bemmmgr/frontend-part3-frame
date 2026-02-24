@@ -17,8 +17,6 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Local env files (choose one strategy)
-# ✅ 推荐：忽略本地环境变量（避免泄露）
 .env
 .env.*
 # ❗如果你想提交示例文件，用：.env.example（不要忽略它）
@@ -29,9 +27,6 @@ lerna-debug.log*
 .idea/
 .vscode/*
 !.vscode/extensions.json
-# 如果你也希望共享 VSCode 设置，可以再放开下面两行：
-# !.vscode/settings.json
-# !.vscode/launch.json
 
 # Windows stuff
 *.suo
