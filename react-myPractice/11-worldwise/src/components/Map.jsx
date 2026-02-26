@@ -1,18 +1,22 @@
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useState } from "react";
 import styles from "./Map.module.css";
+import { useCities } from "../contexts/CitiesContext";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   MapContainer,
   TileLayer,
   Marker,
   Popup,
-  CircleMarker,
+  useMap,
+  useMapEvent,
+  useMapEvents,
 } from "react-leaflet";
-import { useState } from "react";
 
 // 修复icon
 import L from "leaflet";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { useEffect } from "react";
 
 const icon = L.icon({
   iconUrl: markerIcon,
@@ -23,21 +27,32 @@ const icon = L.icon({
 
 function Map() {
   // 17016 - prommatic navigation with useNavigates
-  const navigate = useNavigate();
+
+  // 18012 - displaying city Makers on Map
+  const { cities } = useCities();
 
   // 17015 - reading and searching a query string
-  const [searchParams, setSearchParams] = useSearchParams();
-  const lat = searchParams.get("lat");
-  const lng = searchParams.get("lng");
-
   const [mapPosition, setMapPosition] = useState([40, 0]);
+
+  const [searchParams] = useSearchParams();
+  const mapLat = searchParams.get("lat");
+  const mapLng = searchParams.get("lng");
+
+  // 18013
+  useEffect(
+    function () {
+      if (mapLat && mapLng) setMapPosition([mapLat, mapLng]);
+    },
+    [mapLat, mapLng],
+  );
 
   return (
     <div className={styles.mapContainer}>
       {/* 18011 - including a map using leaflet library */}
       <MapContainer
         center={mapPosition}
-        zoom={13}
+        // center={[mapLat, mapLng]}
+        zoom={6}
         scrollWheelZoom={true}
         className={styles.map}
       >
@@ -45,12 +60,41 @@ function Map() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
         />
-        <Marker position={mapPosition} icon={icon}>
-          <Popup>A pretty CSS3 popup.</Popup>
-        </Marker>
+        {cities.map((city) => (
+          <Marker
+            position={[city.position.lat, city.position.lng]}
+            key={city.id}
+            icon={icon}
+          >
+            <Popup>
+              <span>{city.emoji}</span> <span>{city.cityName}</span>
+            </Popup>
+          </Marker>
+        ))}
+
+        <ChangeCenter position={mapPosition} />
+        <DetectClick />
       </MapContainer>
     </div>
   );
+}
+
+// 18013 - interacting with map
+// use leaflet library custom hooks
+function ChangeCenter({ position }) {
+  const map = useMap(); // by leaflet
+  map.setView(position);
+  return null;
+}
+
+function DetectClick() {
+  const navigate = useNavigate();
+  useMapEvents({
+    click: (e) => {
+      // console.log(e);
+      navigate(`form?lat=${e.latlng.lat}&lng=${e.latlng.lng}`);
+    },
+  });
 }
 
 export default Map;
