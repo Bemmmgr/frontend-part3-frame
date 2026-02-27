@@ -1,6 +1,8 @@
+import Button from "./Button";
 import styles from "./Map.module.css";
 import { useState, useEffect } from "react";
 import { useCities } from "../contexts/CitiesContext";
+import { useUrlPosition } from "../hooks/useUrlPosition";
 import { useGeolocation } from "../hooks/useGeogolocation";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -17,7 +19,6 @@ import {
 import L from "leaflet";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import Button from "./Button";
 
 const icon = L.icon({
   iconUrl: markerIcon,
@@ -42,9 +43,7 @@ function Map() {
     getPosition,
   } = useGeolocation();
 
-  const [searchParams] = useSearchParams();
-  const mapLat = searchParams.get("lat");
-  const mapLng = searchParams.get("lng");
+  const [mapLat, mapLng] = useUrlPosition();
 
   // 18013
   useEffect(
