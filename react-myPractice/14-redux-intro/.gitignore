@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Production build
+dist/
+dist-ssr/
+
+# Vite cache
+.vite/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+.env
+.env.*
+# ❗如果你想提交示例文件，用：.env.example（不要忽略它）
+!.env.example
+
+# OS / Editor
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Windows stuff
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
