@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+// 20016 - refactoring account slice
 const initialState = {
   balance: 0,
   loan: 0,
