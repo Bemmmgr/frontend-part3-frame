@@ -1,14 +1,19 @@
 // 20007 - Professional redux file structure state slices
 const initialStateAccount = {
   balance: 0,
-  load: 0,
+  loan: 0,
   loanPurpose: "",
+  isLoading: false,
 };
 
 export default function accountReducer(state = initialStateAccount, action) {
   switch (action.type) {
     case "account/deposit":
-      return { ...state, balance: state.balance + action.payload };
+      return {
+        ...state,
+        balance: state.balance + action.payload,
+        isLoading: false,
+      };
     case "account/withdraw":
       return { ...state, balance: state.balance - action.payload };
     case "account/requestLoan":
@@ -26,13 +31,31 @@ export default function accountReducer(state = initialStateAccount, action) {
         loanPurpose: "",
         balance: state.balance - state.loan,
       };
+
+    case "account/convertingCurrency":
+      return { ...state, isLoading: true };
     default:
       return state;
   }
 }
 
-export function deposit(amount) {
-  return { type: "account/deposit", payload: amount };
+// 20012 - making an API call wieh redux thunks
+export function deposit(amount, currency) {
+  if (currency === "USD") return { type: "account/deposit", payload: amount };
+
+  // when return function, react knows its asynchronous action
+  // middleware - between dispatching and store
+  return async function (dispatch, getState) {
+    // API call
+    const res = await fetch(
+      `https://api.frankfurter.dev/v1/latest?base=${currency}&symbols=USD`,
+    );
+    const data = await res.json();
+    const convertedAmount = Number((amount * data.rates.USD).toFixed(2));
+
+    // return action
+    dispatch({ type: "account/deposit", payload: convertedAmount });
+  };
 }
 
 export function withdraw(amount) {
