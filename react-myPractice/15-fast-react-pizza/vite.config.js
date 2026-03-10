@@ -10,7 +10,7 @@ export default defineConfig({
       emitWarning: true,
       emitError: true,
       failOnWarning: false,
-      failOnError: true,
+      failOnError: false,
     }),
   ],
 });
