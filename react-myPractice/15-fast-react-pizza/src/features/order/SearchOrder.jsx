@@ -1,16 +1,16 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // 22010 - fetching orders
 function SearchOrder() {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const navigate = useNavigate();
 
   function handleSubmit(e) {
     e.preventDefault();
     if (!query) return;
     navigate(`/order/${query}`);
-    setQuery("");
+    setQuery('');
   }
 
   return (
@@ -19,6 +19,7 @@ function SearchOrder() {
         placeholder="Search Order #"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
+        className="input"
       />
     </form>
   );
