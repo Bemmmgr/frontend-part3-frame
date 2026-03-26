@@ -47,3 +47,20 @@ const variations = {
     }
   `,
 };
+
+// 25007 - building more reuseable components
+const Button = styled.button`
+  border: none;
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--shadow-sm);
+
+  ${(props) => sizes[props.size]}
+  ${(props) => variations[props.variation]}
+`;
+
+Button.defaultProps = {
+  variations: "primary",
+  size: "medium",
+};
+
+export default Button;
