@@ -17,7 +17,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<AppLayOut />}>
-            <Route index element={<Navigate replace to="dashboard" />} />
+            <Route index element={<Navigate replace to="" />} />
 
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="bookings" element={<Bookings />} />
