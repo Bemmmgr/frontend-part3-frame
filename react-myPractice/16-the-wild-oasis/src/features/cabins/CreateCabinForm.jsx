@@ -32,7 +32,7 @@ function CreateCabinForm() {
   // 27008 - introducing react hook form
   function onSubmit(data) {
     // 正式触发这次 mutation，并把 data 作为参数传给你的 mutationFn
-    mutate(data);
+    mutate({ ...data, image: data.image[0] });
   }
 
   // 27010 - handling form errors
@@ -88,7 +88,7 @@ function CreateCabinForm() {
           {...register("discount", {
             required: "This field is required",
             validate: (value) =>
-              value <= getValues().regularPrice ||
+              Number(value) <= Number(getValues().regularPrice) ||
               "Discount should be less than regular price",
           })}
         />
@@ -111,7 +111,14 @@ function CreateCabinForm() {
       </FormRow>
 
       <FormRow label="Cabin photo">
-        <FileInput id="image" accept="image/*" />
+        <FileInput
+          id="image"
+          accept="image/*"
+          type="file"
+          {...register("image", {
+            required: "This field is required",
+          })}
+        />
       </FormRow>
 
       <FormRow>
