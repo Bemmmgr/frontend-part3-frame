@@ -11,6 +11,21 @@ export async function getCabins() {
   return data;
 }
 
+// 27009 - create a new cabin
+export async function createCabin(newCabin) {
+  const { data, error } = await supabase
+    .from("cabins")
+    .insert([newCabin])
+    .select();
+
+  if (error) {
+    console.error(error);
+    throw new Error("Cabins could not be created");
+  }
+
+  return data;
+}
+
 // 27006 - mutations deleting a cabin
 export async function deleteCabin(id) {
   const { data, error } = await supabase.from("cabins").delete().eq("id", id);

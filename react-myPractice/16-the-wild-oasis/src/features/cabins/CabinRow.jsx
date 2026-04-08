@@ -62,7 +62,7 @@ function CabinRow({ cabin }) {
       toast.success("Cabin successfully deleted");
 
       queryClient.invalidateQueries({
-        queryKey: ["cabin"],
+        queryKey: ["cabins"],
       });
     },
     onError: (err) => toast.error(err.message),
