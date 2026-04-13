@@ -30,7 +30,7 @@ const TableHeader = styled.header`
 
 // 27005 - fetching cabins data
 function CabinTable() {
-  const { isLoading, cabins } = useCabins;
+  const { isLoading, cabins } = useCabins();
 
   if (isLoading) return <Spinner />;
 
