@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import { HiXMark } from "react-icons/hi2";
+import { createPortal } from "react-dom";
 
 const StyledModal = styled.div`
   position: fixed;
@@ -48,3 +50,26 @@ const Button = styled.button`
     color: var(--color-grey-500);
   }
 `;
+
+/*  why react portal
+引入 React Portal，是为了把某个组件的 DOM 节点渲染到当前组件树之外的位置，但它依然保留在原来的 React 组件逻辑树 中。
+
+最常见的原因是：解决层级和布局限制问题
+*/
+
+function Modal({ children, onClose }) {
+  return createPortal(
+    <Overlay>
+      <StyledModal>
+        <Button onClick={onClose}>
+          <HiXMark />
+        </Button>
+
+        <div>{children}</div>
+      </StyledModal>
+    </Overlay>,
+    document.body,
+  );
+}
+
+export default Modal;
