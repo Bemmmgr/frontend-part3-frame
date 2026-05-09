@@ -14,15 +14,24 @@ export function useBookings() {
       : { field: "status", value: filtervalue };
   // { field: "totalPrice", value: 5000, method: "gte" };
 
+  // Sort Api-side sorting bookings - 29007
+  const soryByRaw = searchParams.get("sortBy") || "startDate-desc";
+  const [field, direction] = soryByRaw.split("-");
+  const sortBy = { field, direction };
+
+  // PAGINATION
+  const page = !searchParams.get("page") ? 1 : Number(searchParams.get("page"));
+
+  // QUERY
   const {
     isLoading,
-    data: bookings,
+    data: { data: bookings, count } = {},
     error,
   } = useQuery({
-    queryKey: ["bookings", filter],
+    queryKey: ["bookings", filter, sortBy, page],
     // query func: responsible for actual querying: fetch data from api
-    queryFn: () => getBookings({ filter }),
+    queryFn: () => getBookings({ filter, sortBy, page }),
   });
 
-  return { isLoading, bookings, error };
+  return { isLoading, bookings, error, count };
 }
