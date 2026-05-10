@@ -11,8 +11,9 @@ import Users from "./pages/Users";
 import Settings from "./pages/Settings";
 import Account from "./pages/Account";
 import Login from "./pages/Login";
-import PageNotFound from "./pages/PageNotFound";
 import AppLayOut from "./ui/AppLayOut";
+import Booking from "./pages/Booking";
+import PageNotFound from "./pages/PageNotFound";
 
 // 27003 - Setting up react query
 const queryClient = new QueryClient({
@@ -38,6 +39,7 @@ function App() {
 
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="bookings" element={<Bookings />} />
+            <Route path="bookings/:bookingId" element={<Booking />} />
             <Route path="cabins" element={<Cabins />} />
             <Route path="users" element={<Users />} />
             <Route path="settings" element={<Settings />} />
