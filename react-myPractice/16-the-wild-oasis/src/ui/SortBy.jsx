@@ -8,8 +8,15 @@ function SortBy({ options }) {
   const sortBy = searchParams.get("sortBy") || "";
 
   function handleChange(e) {
-    searchParams.set("sortBy", e.target.value);
-    setSearchParams(searchParams);
+    const nextSort = e.target.value;
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("sortBy", nextSort);
+
+    // 关键：排序变化后回到第一页，避免越界 range
+    if (nextParams.get("page")) nextParams.set("page", "1");
+
+    setSearchParams(nextParams);
   }
 
   return (
