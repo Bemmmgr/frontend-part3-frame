@@ -11,7 +11,7 @@ export function useBooking() {
     data: booking,
     error,
   } = useQuery({
-    queryKey: ["booking"],
+    queryKey: ["booking", bookingId],
     // query func: responsible for actual querying: fetch data from api
     queryFn: () => getBooking(bookingId),
     retry: false,
