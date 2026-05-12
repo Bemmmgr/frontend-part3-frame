@@ -15,6 +15,7 @@ import AppLayOut from "./ui/AppLayOut";
 import Booking from "./pages/Booking";
 import Checkin from "./pages/Checkin";
 import PageNotFound from "./pages/PageNotFound";
+import ProtectedRoute from "./ui/ProtectedRoute";
 
 // 27003 - Setting up react query
 const queryClient = new QueryClient({
@@ -35,7 +36,13 @@ function App() {
       <GlobalStyles />
       <BrowserRouter>
         <Routes>
-          <Route element={<AppLayOut />}>
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppLayOut />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<Navigate replace to="" />} />
 
             <Route path="dashboard" element={<Dashboard />} />
