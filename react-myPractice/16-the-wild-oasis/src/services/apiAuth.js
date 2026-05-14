@@ -1,3 +1,4 @@
+import { SupabaseClient } from "@supabase/supabase-js";
 import supabase from "./supabase";
 
 // 29016 - Authentication user login with supabase
@@ -18,9 +19,14 @@ export async function getCurrentUser() {
   if (!session.session) return null;
 
   const { data, error } = await supabase.auth.getUser();
-  console.log(data);
 
   if (error) throw new Error(error.message);
 
   return data?.user;
+}
+
+// 29018 - logout func
+export async function logout() {
+  const { error } = await supabase.auth.signOut();
+  if (error) throw new Error(error.message);
 }
