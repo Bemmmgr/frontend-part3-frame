@@ -1,5 +1,21 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import supabase from "./supabase";
+
+// 29021 - user sign up
+export async function signup({ fullName, email, password }) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        fullName,
+        avatar: "",
+      },
+    },
+  });
+
+  if (error) throw new Error(error.message);
+  return data;
+}
 
 // 29016 - Authentication user login with supabase
 export async function login({ email, password }) {
