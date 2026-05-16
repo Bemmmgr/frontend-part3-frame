@@ -1,4 +1,5 @@
 import supabase from "./supabase";
+import { supabaseUrl } from "./supabase";
 
 // 29021 - user sign up
 export async function signup({ fullName, email, password }) {
@@ -45,4 +46,37 @@ export async function getCurrentUser() {
 export async function logout() {
   const { error } = await supabase.auth.signOut();
   if (error) throw new Error(error.message);
+}
+
+// 29024 - updating user data & password
+export async function updateCurrentUser({ password, fullName, avatar }) {
+  // 1. update password OR fullName
+  let updateData;
+  if (password) updateData = { password };
+  if (fullName) updateData = { data: { fullName } };
+
+  const { data, error } = await supabase.auth.updateUser(updateData);
+
+  if (error) throw new Error(error.message);
+  if (!avatar) return data;
+
+  // 2. upload the avatar image 生成唯一文件名
+  const fileName = `avatar-${data.user.id}-${Math.random()}`;
+
+  const { error: storageError } = await supabase.storage
+    .from("avatars")
+    .upload(fileName, avatar);
+
+  if (error) throw new Error(storageError.message);
+
+  // 3. update avatar in the user
+  const avatarUrl = `${supabaseUrl}/storage/v1/object/public/avatars/${fileName}`;
+
+  const { data: updateCurrentUser, error: error2 } =
+    await supabase.auth.updateUser({
+      data: { avatar: avatarUrl },
+    });
+  if (error2) throw new Error(error2.message);
+
+  return updateCurrentUser;
 }
