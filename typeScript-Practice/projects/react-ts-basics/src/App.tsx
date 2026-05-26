@@ -1,16 +1,46 @@
-import CourseGoal from "./components/CourseGoal";
+import { useState } from "react";
+
 import Header from "./components/Header";
 import goalsImg from "./assets/goals.jpg";
+import CourseGoal from "./components/CourseGoal";
+import CourseGoalList from "./components/CourseGoalList";
+
+export type CourseGoal = {
+  title: string;
+  description: string;
+  id: number;
+};
 
 export default function App() {
+  // 037 - using useState & typescript
+  // 038 - state & outputting state based values
+  const [goals, setGoals] = useState<CourseGoal[]>([]);
+
+  function handleAddGoal() {
+    setGoals((prevGoals) => {
+      const newGoal: CourseGoal = {
+        id: Math.random(),
+        title: "Learn React + TS",
+        description: "Learn it in depth!",
+      };
+      return [...prevGoals, newGoal];
+    });
+  }
+
+  // 040 Passing functions as values in a type safe way
+  function handleDeleteGoal(id: number) {
+    setGoals((prevGoals) => prevGoals.filter((goal) => goal.id !== id));
+  }
+
   return (
     <main>
       <Header image={{ src: goalsImg, alt: "A list of goals" }}>
         <h1>Your Course Goals</h1>
       </Header>
-      <CourseGoal title="Learn react & TS">
-        <p>"Learn it from ground up"</p>
-      </CourseGoal>
+
+      <button onClick={handleAddGoal}>Add Goal</button>
+
+      <CourseGoalList goals={goals} onDeleteGoal={handleDeleteGoal} />
     </main>
   );
 }
