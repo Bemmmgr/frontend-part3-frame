@@ -1,1 +1,11 @@
-{}
+{
+  "scripts": {
+    "ts:build": "tsc -p typeScript-Practice/tsconfig.json",
+    "ts:check": "tsc -p typeScript-Practice/tsconfig.json --noEmit",
+    "react-ts-basics:dev": "npm --prefix typeScript-Practice/projects/react-ts-basics run dev",
+    "react-ts-basics:build": "npm --prefix typeScript-Practice/projects/react-ts-basics run build"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

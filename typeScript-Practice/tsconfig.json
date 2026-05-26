@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+
+    "rootDir": "./exercises",
+    "outDir": "./dist",
+
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+
+    "sourceMap": false,
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": ["exercises/**/*.ts"],
+  "exclude": ["dist", "projects", "course-resources"]
+}
