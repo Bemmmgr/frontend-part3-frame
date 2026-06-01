@@ -1,7 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 // 090 - setting state type
-type cartItem = {
+export type cartItem = {
   id: string;
   title: string;
   price: number;
@@ -49,3 +49,6 @@ export const cartslice = createSlice({
     },
   },
 });
+
+// 094 dispatching actions & adjusting useDispatch hook
+export const { addToCart, removeFormCart } = cartslice.actions;
